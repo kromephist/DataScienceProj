@@ -5,8 +5,8 @@ from neural_network import train_neural_network
 from plotting import *
 
 # Get the match ids for a specific tournament code
-tournament_code = "VC2022"
-match_ids = get_match_ids(tournament_code)
+tournament_name = "Valorant Champions 2022"
+match_ids = get_match_ids(tournament_name)
 
 # Calculate the efficacy data for each match
 efficacy_data = calculate_efficacy(match_ids)

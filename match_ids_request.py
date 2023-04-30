@@ -1,17 +1,26 @@
 import requests
-import time
 
-def get_match_ids(tournament_code):
+def get_match_ids(tournament_name):
     """
-    Given a tournament code, returns a list of match IDs for that tournament
+    Given a tournament name, returns a list of match IDs for that tournament
     """
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer RGAPI-bbf96d04-910e-4d6e-908e-d1185ebb7708'
+        'Authorization': 'Bearer 8YfkVAHA7EBEwzAr86TOYJbZ88fpmQmMoYXqf6DTACw7BiS5Nuw'
     }
 
-    # Get the tournament ID from the tournament code
-    url = f'https://api.pandascore.co/valorant/tournaments?filter[url]={tournament_code}'
+    API_KEY = '8YfkVAHA7EBEwzAr86TOYJbZ88fpmQmMoYXqf6DTACw7BiS5Nuw'
+
+
+
+    url = f'https://api.pandascore.co/tournaments?filter[slug]={tournament_name}&token={API_KEY}'
+    response = requests.get(url)
+
+    if not response.json():
+        return []
+
+    # Get the tournament ID from the tournament name
+    url = f'https://api.pandascore.co/valorant/tournaments?filter[url]={tournament_name}'
     response = requests.get(url, headers=headers)
     tournament_id = response.json()[0]['id']
 

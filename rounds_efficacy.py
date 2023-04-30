@@ -10,7 +10,7 @@ def calculate_efficacy(match_ids):
     """
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer API_KEY'
+        'Authorization': 'Bearer 8YfkVAHA7EBEwzAr86TOYJbZ88fpmQmMoYXqf6DTACw7BiS5Nuw'
     }
 
     # Initialize the list of dictionaries
