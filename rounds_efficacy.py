@@ -1,43 +1,52 @@
 import requests
+import json
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+import time
+def calculate_efficacy(match_ids):
+    """
+    Given a list of match IDs, returns a list of dictionaries containing the efficacy values
+    for each team in each match.
+    """
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer API_KEY'
+    }
 
-# Replace YOUR_API_KEY with your actual API key
-api_key = "RGAPI-bbf96d04-910e-4d6e-908e-d1185ebb7708"
+    # Initialize the list of dictionaries
+    efficacy_data = []
 
-# Set the API endpoint and match ID
-endpoint = "https://api.valorant.riotgames.com/val/match/v1/matches/"
-match_id = "MATCH_ID"
+    # Loop over each match ID
+    for match_id in match_ids:
+        # Get the data for the match
+        url = f'https://api.pandascore.co/valorant/matches/{match_id}'
+        response = requests.get(url, headers=headers)
+        data = response.json()
 
-# Set the headers and query parameters
-headers = {"X-Riot-Token": api_key}
-params = {"matchId": match_id}
+        # Get the ID and name of each team
+        team_ids = [team['id'] for team in data['opponents']]
+        team_names = [team['name'] for team in data['opponents']]
+       
+        # Loop over each team
+        for i, team_id in enumerate(team_ids):
+            # Get the round data for the team
+            url = f'https://api.pandascore.co/valorant/matches/{match_id}/rounds?filter[team_id]={team_id}'
+            response = requests.get(url, headers=headers)
+            data = response.json()
+            
+            # Calculate the efficacy values for the team
+            save_eff = sum([round['player_stats']['round_stats']['is_defuse'] for round in data]) / len(data)
+            eco_eff = sum([round['player_stats']['round_stats']['is_first_kill'] for round in data]) / len(data)
+            buy_eff = sum([round['player_stats']['round_stats']['is_first_death'] for round in data]) / len(data)
 
-# Make the API request
-response = requests.get(endpoint, headers=headers, params=params)
+            # Add the efficacy data to the list of dictionaries
+            efficacy_data.append({'match_id': match_id, 'team_id': team_id, 'team_name': team_names[i],
+                                  'save_eff': save_eff, 'eco_eff': eco_eff, 'buy_eff': buy_eff})
 
-# Get the match data from the response JSON
-match_data = response.json()
+    # Scale the efficacy data using min-max scaling
+    efficacy_df = pd.DataFrame(efficacy_data)
+    scaler = MinMaxScaler()
+    efficacy_df[['save_eff', 'eco_eff', 'buy_eff']] = scaler.fit_transform(efficacy_df[['save_eff', 'eco_eff', 'buy_eff']])
+    efficacy_data = efficacy_df.to_dict('records')
 
-# Define a dictionary to store the win rates for each economy state
-win_rates = {"save": 0, "eco": 0, "full_buy": 0, "force_buy": 0}
-
-# Iterate through each round and calculate the win rate for each economy state
-for round_data in match_data["info"]["roundResults"]:
-    if round_data["roundCeremony"] == "CeremonyEconomy":
-        economy_type = round_data["roundResult"]
-        win_type = round_data["winType"]
-        if win_type == "Elimination":
-            win_rates[economy_type] += 1
-
-# Calculate the total number of rounds for each economy state
-total_rounds = sum(win_rates.values())
-
-# Calculate the win rate for each economy state
-for economy_type in win_rates:
-    win_rates[economy_type] /= total_rounds
-    win_rates[economy_type] *= 100
-
-# Print the win rates for each economy state
-print("Save win rate: ", win_rates["save"], "%")
-print("Eco win rate: ", win_rates["eco"], "%")
-print("Full buy win rate: ", win_rates["full_buy"], "%")
-print("Force buy win rate: ", win_rates["force_buy"], "%")
+    return efficacy_data
