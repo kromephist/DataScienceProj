@@ -2,8 +2,8 @@ import requests
 import json
 
 # Replace 'YOUR_API_KEY' with a valid Twitch API key
-client_id = 'j3y1cfszu2ptbntdp27n75hyqdqa9d'
-client_secret = 'l3uzsh5fenkpkt8yl4fb8g49ut4kyt'
+client_id = "j3y1cfszu2ptbntdp27n75hyqdqa9d"
+client_secret = "iaam7paa6gvve7uvwirkuohzsuekug"
 
 # Set up the headers for the API request
 headers = {
