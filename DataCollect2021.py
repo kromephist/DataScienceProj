@@ -36,7 +36,7 @@ top_100 = response.json()["data"]
 # Set up the CSV file and headers
 filename = f"top_100_streamers_{start_year}_{end_year}.csv"
 with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-    fieldnames = ['date', 'rank', 'username', 'viewer_count']
+    fieldnames = ['date', 'rank', 'username', 'viewer_count', 'game_name']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
 
